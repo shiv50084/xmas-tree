@@ -26,8 +26,6 @@ int print_tree(int height, char half)
     }
     else if (!half) // full tree
     {
-        int max_width = 2 * (height - 1) + 1;
-
         for (i = 0;i < height;i++)
         {
             int width = i + height;
