@@ -1,34 +1,66 @@
 /*Build: gcc -std=c99 -o xmas3 xmas3.c*/
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-int print_tree(int length)
+void usage(char *argv0)
+{
+    printf("USAGE: %s [height] [half|full]\n", argv0);
+    exit(-1);
+}
+
+int print_tree(int height, char half)
 {
     int i = 0, j = 0;
 
-    for (i = 0;i<length;i++)
+    if (half) // Half tree
     {
-        for (j = 0;j<=i;j++)
+        for (i = 0;i < height;i++)
         {
-            printf("*");
+            for (j = 0;j <= i;j++)
+            {
+                printf("*");
+            }
+            printf("\n");
         }
-        printf("\n");
+    }
+    else if (!half) // full tree
+    {
+        int max_width = 2 * (height - 1) + 1;
+
+        for (i = 0;i < height;i++)
+        {
+            int width = i + height;
+            for (j = 0;j < width;j++)
+            {
+                if (j < (height-1) - i)
+                    printf(" ");
+                else
+                    printf("*");
+            }
+            printf("\n");
+        }
     }
 
     return 0;
 }
 
-int main(int argc, char*argv[])
+int main(int argc, char *argv[])
 {
-    if (argc != 2)
-    {
-        printf("USAGE: %s [length]\n", argv[0]);
-        exit(-1);
-    }
+    if (argc != 3)
+        usage(argv[0]);
 
-    int length = atoi(argv[1]);
+    int height = atoi(argv[1]);
 
-    print_tree(length);
+    char half = -1;
+    if (!strncmp("half", argv[2], sizeof 4))
+        half = 1;
+    else if(!strncmp("full", argv[2], sizeof 4))
+        half = 0;
+    else
+        usage(argv[0]);
+
+    print_tree(height, half);
 
     return 0;
 }
