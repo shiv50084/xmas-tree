@@ -99,6 +99,14 @@ int main(int argc, char *argv[])
                     height = 1;
 
                 break;
+            case 'f': // Press f or F for full tree
+            case 'F':
+                half = 0;
+                break;
+            case 'h': // Press h or H for half tree
+            case 'H':
+                half = 1;
+                break;
         }
 
         erase();
