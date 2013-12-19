@@ -20,7 +20,13 @@ int print_tree(int height, char half)
         {
             for (j = 0;j <= i;j++)
             {
+                if (j == i)
+                    attron(A_UNDERLINE);
+
                 mvaddstr(i, j, "*");
+
+                if (j == i)
+                    attroff(A_UNDERLINE);
             }
             mvaddstr(i, j, "\n");
         }
