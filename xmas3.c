@@ -1,7 +1,8 @@
-/*Build: gcc -std=c99 -o xmas3 xmas3.c*/
+/*Build: gcc -std=c99 -o xmas3 xmas3.c -lncurses*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <curses.h>
 
 void usage(char *argv0)
 {
@@ -19,9 +20,9 @@ int print_tree(int height, char half)
         {
             for (j = 0;j <= i;j++)
             {
-                printf("*");
+                mvprintw(i, j, "*");
             }
-            printf("\n");
+            mvprintw(i, j, "\n");
         }
     }
     else if (!half) // full tree
@@ -32,19 +33,23 @@ int print_tree(int height, char half)
             for (j = 0;j < width;j++)
             {
                 if (j < (height-1) - i)
-                    printf(" ");
+                    mvprintw(i, j, " ");
                 else
-                    printf("*");
+                    mvprintw(i, j, "*");
             }
-            printf("\n");
+            mvprintw(i, j, "\n");
         }
     }
 
+    refresh();
     return 0;
 }
 
 int main(int argc, char *argv[])
 {
+    WINDOW *mainwin;
+    int ch;
+
     if (argc != 3)
         usage(argv[0]);
 
@@ -58,7 +63,49 @@ int main(int argc, char *argv[])
     else
         usage(argv[0]);
 
-    print_tree(height, half);
+
+    mainwin = initscr();
+    if (mainwin == NULL)
+    {
+        fprintf(stderr, "Error initialising ncurses.\n");
+        exit(-1);
+    }
+
+    clear();
+    // Initialize colors
+    start_color();
+    // Turn off key echoing
+    noecho();
+    // Line buffering disabled
+    cbreak();
+    // Enable the keypad for non-char keys
+    keypad(mainwin, TRUE);
+
+    // Loop until press q
+    while ((ch = getch()) != 'q')
+    {
+        switch(ch)
+        {
+            case KEY_UP: // Press Up to increase height
+                height += 1;
+                break;
+            case KEY_DOWN: // Press Down to decrease height
+                height -= 1;
+
+                if (height < 1)
+                    height = 1;
+
+                break;
+        }
+
+        erase();
+        print_tree(height, half);
+    }
+
+
+    delwin(mainwin);
+    endwin();
+    refresh();
 
     return 0;
 }
