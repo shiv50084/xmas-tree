@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
 {
     WINDOW *mainwin;
     int ch;
+    int maxX = 0, maxY = 0;
 
     if (argc != 3)
         usage(argv[0]);
@@ -63,11 +64,22 @@ int main(int argc, char *argv[])
     else
         usage(argv[0]);
 
-
     mainwin = initscr();
     if (mainwin == NULL)
     {
         fprintf(stderr, "Error initialising ncurses.\n");
+        exit(-1);
+    }
+
+    // Get the maximum size of the screen
+    getmaxyx(mainwin, maxY, maxX);
+
+    // Check if colors are supported
+    if (has_colors() == FALSE)
+    {
+        delwin(mainwin);
+        endwin();
+        fprintf(stderr,"Your terminal does not support color\n");
         exit(-1);
     }
 
@@ -91,6 +103,10 @@ int main(int argc, char *argv[])
         {
             case KEY_UP: // Press Up to increase height
                 height += 1;
+
+                if (height > maxY)
+                    height = maxY;
+
                 break;
             case KEY_DOWN: // Press Down to decrease height
                 height -= 1;
