@@ -20,9 +20,9 @@ int print_tree(int height, char half)
         {
             for (j = 0;j <= i;j++)
             {
-                mvprintw(i, j, "*");
+                mvaddstr(i, j, "*");
             }
-            mvprintw(i, j, "\n");
+            mvaddstr(i, j, "\n");
         }
     }
     else if (!half) // full tree
@@ -32,12 +32,10 @@ int print_tree(int height, char half)
             int width = i + height;
             for (j = 0;j < width;j++)
             {
-                if (j < (height-1) - i)
-                    mvprintw(i, j, " ");
-                else
-                    mvprintw(i, j, "*");
+                if (j >= (height-1) - i)
+                    mvaddstr(i, j, "*");
             }
-            mvprintw(i, j, "\n");
+            mvaddstr(i, j, "\n");
         }
     }
 
@@ -86,6 +84,10 @@ int main(int argc, char *argv[])
     clear();
     // Initialize colors
     start_color();
+
+    // Assign terminal default foreground/background colors to color number -1
+    use_default_colors();
+
     // Turn off key echoing
     noecho();
     // Line buffering disabled
@@ -114,6 +116,12 @@ int main(int argc, char *argv[])
                 if (height < 1)
                     height = 1;
 
+                break;
+            case KEY_RIGHT: // Press right key reverse foreground/background colour.
+                attron(A_REVERSE);
+                break;
+            case KEY_LEFT: // Press left key return to default foreground/background colour.
+                attroff(A_REVERSE);
                 break;
             case 'f': // Press f or F for full tree
             case 'F':
