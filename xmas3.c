@@ -81,6 +81,9 @@ int main(int argc, char *argv[])
     // Enable the keypad for non-char keys
     keypad(mainwin, TRUE);
 
+    // Print tree and then wait for a key
+    print_tree(height, half);
+
     // Loop until press q
     while ((ch = getch()) != 'q')
     {
