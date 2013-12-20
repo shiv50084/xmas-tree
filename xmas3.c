@@ -21,12 +21,12 @@ int print_tree(int height, char half)
             for (j = 0;j <= i;j++)
             {
                 if (j == i)
-                    attron(A_UNDERLINE);
+                    attron(A_BOLD | A_BLINK | A_UNDERLINE);
 
                 mvaddstr(i, j, "*");
 
                 if (j == i)
-                    attroff(A_UNDERLINE);
+                    attroff(A_BOLD | A_BLINK | A_UNDERLINE);
             }
             mvaddstr(i, j, "\n");
         }
@@ -39,7 +39,21 @@ int print_tree(int height, char half)
             for (j = 0;j < width;j++)
             {
                 if (j >= (height-1) - i)
+                {
+                    if (j == (height-1) - i ||
+                        j == width-1)
+                    {
+                        attron(A_BOLD | A_BLINK | A_UNDERLINE);
+                    }
+
                     mvaddstr(i, j, "*");
+
+                    if (j == (height-1) - i ||
+                        j == width-1)
+                    {
+                        attroff(A_BOLD | A_BLINK | A_UNDERLINE);
+                    }
+                }
             }
             mvaddstr(i, j, "\n");
         }
@@ -79,27 +93,46 @@ int main(int argc, char *argv[])
     getmaxyx(mainwin, maxY, maxX);
 
     // Check if colors are supported
-    if (has_colors() == FALSE)
+    if (!has_colors())
     {
         delwin(mainwin);
         endwin();
         fprintf(stderr,"Your terminal does not support color\n");
         exit(-1);
     }
+    else
+    {
+        // Initialize colors
+        start_color();
+
+        // Assign terminal default foreground/background colors to color number -1
+        use_default_colors();
+
+        init_pair(1, COLOR_RED,     COLOR_BLACK);
+        init_pair(2, COLOR_GREEN,   COLOR_BLACK);
+        init_pair(3, COLOR_YELLOW,  COLOR_BLACK);
+        init_pair(4, COLOR_BLUE,    COLOR_BLACK);
+        init_pair(5, COLOR_CYAN,    COLOR_BLACK);
+        init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+        init_pair(7, COLOR_WHITE,   COLOR_BLACK);
+        init_pair(8, COLOR_RED,     COLOR_WHITE);
+        init_pair(9, COLOR_GREEN,   COLOR_WHITE);
+    }
+
 
     clear();
-    // Initialize colors
-    start_color();
-
-    // Assign terminal default foreground/background colors to color number -1
-    use_default_colors();
 
     // Turn off key echoing
     noecho();
     // Line buffering disabled
     cbreak();
+    // This determines the visibility of the cursor.
+    curs_set(FALSE);
+    // Tell curses not to do NL->CR/NL on output
+    nonl();
     // Enable the keypad for non-char keys
     keypad(mainwin, TRUE);
+
 
     // Print tree and then wait for a key
     print_tree(height, half);
@@ -109,6 +142,18 @@ int main(int argc, char *argv[])
     {
         switch(ch)
         {
+            case '0': // Set foreground/background colors to default
+            case '1': // Set foreground/background colors according to init_pairs
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                attrset(COLOR_PAIR(ch - '0'));
+                break;
             case KEY_UP: // Press Up to increase height
                 height += 1;
 
@@ -124,10 +169,10 @@ int main(int argc, char *argv[])
 
                 break;
             case KEY_RIGHT: // Press right key reverse foreground/background colour.
-                attron(A_REVERSE);
+                attron(A_REVERSE | A_BLINK);
                 break;
             case KEY_LEFT: // Press left key return to default foreground/background colour.
-                attroff(A_REVERSE);
+                attroff(A_REVERSE | A_BLINK);
                 break;
             case 'f': // Press f or F for full tree
             case 'F':
