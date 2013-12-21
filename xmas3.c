@@ -10,6 +10,29 @@ void usage(char *argv0)
     exit(-1);
 }
 
+int color_str(int y, int x, short fg_color, short bg_color, const char * str)
+{
+    short i;
+    // Search all the pair of colors
+    // to match with the given one.
+    // Then apply the specific pair.
+    // Naive way
+    for (i = 1;i < COLOR_PAIRS;i++)
+    {
+        short f, b;
+        pair_content(i, &f, &b);
+        if (f == fg_color && b == bg_color)
+            break;
+    }
+
+    attron(COLOR_PAIR(i));
+
+    mvaddstr(y,x,str);
+
+    attroff(COLOR_PAIR(i));
+    return 0;
+}
+
 int print_tree(int height, char half)
 {
     int i = 0, j = 0;
