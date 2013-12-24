@@ -33,6 +33,23 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
     return 0;
 }
 
+int print_trunk(int height_tree, int height_trunk, char half)
+{
+    if (!half) // full tree
+    {
+        for (int i = height_tree; i<height_tree+height_trunk;i++)
+        {
+            for (int j = (height_tree-height_trunk);j < (height_tree-height_trunk) + 2*(height_trunk-1)+1;j++)
+            {
+                mvaddstr(i, j, "*");
+            }
+        }
+    }
+
+    refresh();
+    return 0;
+}
+
 int print_tree(int height, char half)
 {
     int i = 0, j = 0;
@@ -95,7 +112,8 @@ int main(int argc, char *argv[])
     if (argc != 3)
         usage(argv[0]);
 
-    int height = atoi(argv[1]);
+    int height_tree = atoi(argv[1]);
+    int height_trunk = height_tree / 5;
 
     char half = -1;
     if (!strncmp("half", argv[2], sizeof 4))
@@ -158,7 +176,7 @@ int main(int argc, char *argv[])
 
 
     // Print tree and then wait for a key
-    print_tree(height, half);
+    print_tree(height_tree, half);
 
     // Loop until press q
     while ((ch = getch()) != 'q')
@@ -178,17 +196,19 @@ int main(int argc, char *argv[])
                 attrset(COLOR_PAIR(ch - '0'));
                 break;
             case KEY_UP: // Press Up to increase height
-                height += 1;
+                height_tree += 1;
+                height_trunk = height_tree / 5;
 
-                if (height > maxY)
-                    height = maxY;
+                if (height_tree+height_trunk > maxY)
+                    height_tree = maxY - height_trunk;
 
                 break;
             case KEY_DOWN: // Press Down to decrease height
-                height -= 1;
+                height_tree -= 1;
+                height_trunk = height_tree / 5;
 
-                if (height < 1)
-                    height = 1;
+                if (height_tree-height_trunk < 1)
+                    height_tree = 1;
 
                 break;
             case KEY_RIGHT: // Press right key reverse foreground/background colour.
@@ -208,7 +228,8 @@ int main(int argc, char *argv[])
         }
 
         erase();
-        print_tree(height, half);
+        print_tree(height_tree, half);
+        print_trunk(height_tree, height_trunk, half);
     }
 
 
