@@ -178,6 +178,10 @@ int main(int argc, char *argv[])
     // Print tree and then wait for a key
     print_tree(height_tree, half);
 
+    // Print the height of the tree and trunk.
+    mvprintw(maxY-1, 0, "%d", height_tree);
+    mvprintw(maxY-1, 5, "%d", height_trunk);
+
     // Loop until press q
     while ((ch = getch()) != 'q')
     {
@@ -230,6 +234,9 @@ int main(int argc, char *argv[])
         erase();
         print_tree(height_tree, half);
         print_trunk(height_tree, height_trunk, half);
+
+        mvprintw(maxY-1, 0, "%d", height_tree);
+        mvprintw(maxY-1, 5, "%d", height_trunk);
     }
 
 
