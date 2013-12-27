@@ -41,7 +41,7 @@ int print_trunk(int height_tree, int height_trunk, char half)
         {
             for (int j = (height_tree-height_trunk);j < (height_tree-height_trunk) + 2*(height_trunk-1)+1;j++)
             {
-                mvaddstr(i, j, "*");
+                mvaddstr(i, j, "#");
             }
         }
     }
