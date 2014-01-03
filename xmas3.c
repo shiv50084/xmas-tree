@@ -68,7 +68,6 @@ int print_tree(int height, char half)
                 if (j == i)
                     attroff(A_BOLD | A_BLINK | A_UNDERLINE);
             }
-            mvaddstr(i, j, "\n");
         }
     }
     else if (!half) // full tree
@@ -95,7 +94,6 @@ int print_tree(int height, char half)
                     }
                 }
             }
-            mvaddstr(i, j, "\n");
         }
     }
 
