@@ -81,11 +81,23 @@ int print_footer(int maxY, int height_tree, int height_trunk)
 
 int print_trunk(int height_tree, int height_trunk, char half)
 {
+    int width_trunk = 2 * height_trunk - 1;
+
     if (!half) // full tree
     {
         for (int i = height_tree; i < height_tree + height_trunk; i++)
         {
-            for (int j = (height_tree - height_trunk);j < (height_tree - height_trunk) + 2 * height_trunk - 1;j++)
+            for (int j = (height_tree - height_trunk);j < (height_tree - height_trunk) + width_trunk;j++)
+            {
+                mvaddstr(i+HEADER_ROWS, j, "#");
+            }
+        }
+    }
+    else // half tree
+    {
+        for (int i = height_tree; i < height_tree + height_trunk; i++)
+        {
+            for (int j = 0;j < width_trunk / 2;j++)
             {
                 mvaddstr(i+HEADER_ROWS, j, "#");
             }
