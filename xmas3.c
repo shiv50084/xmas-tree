@@ -4,6 +4,10 @@
 #include <string.h>
 #include <curses.h>
 
+#define PHI 1.61803
+
+#define CALC_HEIGHT_TRUNK(x) ((x) / (PHI * 2.0))
+
 #define HEADER_ROWS 1
 #define FOOTER_ROWS 1
 
@@ -169,7 +173,7 @@ int main(int argc, char *argv[])
         usage(argv[0]);
 
     int height_tree = atoi(argv[1]);
-    int height_trunk = height_tree / 5;
+    int height_trunk = CALC_HEIGHT_TRUNK(height_tree);
 
     char half = -1;
     if (!strncmp("half", argv[2], sizeof 4))
@@ -256,24 +260,24 @@ int main(int argc, char *argv[])
                 break;
             case KEY_UP: // Press Up to increase height
                 height_tree += 1;
-                height_trunk = height_tree / 5;
+                height_trunk = CALC_HEIGHT_TRUNK(height_tree);
 
                 if (height_tree + height_trunk + HEADER_ROWS > maxY - FOOTER_ROWS)
                 {
                     height_tree -= 1;
                     // Recalculate trunk
-                    height_trunk = height_tree / 5;
+                    height_trunk = CALC_HEIGHT_TRUNK(height_tree);
                 }
 
                 break;
             case KEY_DOWN: // Press Down to decrease height
                 height_tree -= 1;
-                height_trunk = height_tree / 5;
+                height_trunk = CALC_HEIGHT_TRUNK(height_tree);
 
                 if (height_tree - height_trunk < 1)
                 {
                     height_tree = 1;
-                    height_trunk = height_tree / 5;
+                    height_trunk = CALC_HEIGHT_TRUNK(height_tree);
                 }
 
                 break;
