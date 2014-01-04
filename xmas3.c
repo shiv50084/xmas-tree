@@ -33,13 +33,29 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
     return 0;
 }
 
+int print_footer(int maxY, int height_tree, int height_trunk)
+{
+    char buf[50];
+
+    memset(buf, '\0', sizeof buf);
+    int char_ret1 = snprintf(buf, sizeof buf, "Height tree: %d", height_tree);
+    mvaddstr(maxY - 1, 0, buf);
+
+    memset(buf, '\0', sizeof buf);
+    int char_ret2 = snprintf(buf, sizeof buf, "Height trunk: %d", height_trunk);
+    mvaddstr(maxY - 1, char_ret1 + 1, buf);
+
+    refresh();
+    return 0;
+}
+
 int print_trunk(int height_tree, int height_trunk, char half)
 {
     if (!half) // full tree
     {
-        for (int i = height_tree; i<height_tree+height_trunk;i++)
+        for (int i = height_tree; i < height_tree + height_trunk; i++)
         {
-            for (int j = (height_tree-height_trunk);j < (height_tree-height_trunk) + 2*(height_trunk-1)+1;j++)
+            for (int j = (height_tree - height_trunk);j < (height_tree - height_trunk) + 2 * height_trunk - 1;j++)
             {
                 mvaddstr(i, j, "#");
             }
@@ -175,10 +191,8 @@ int main(int argc, char *argv[])
 
     // Print tree and then wait for a key
     print_tree(height_tree, half);
-
-    // Print the height of the tree and trunk.
-    mvprintw(maxY-1, 0, "%d", height_tree);
-    mvprintw(maxY-1, 5, "%d", height_trunk);
+    print_trunk(height_tree, height_trunk, half);
+    print_footer(maxY, height_tree, height_trunk);
 
     // Loop until press q
     while ((ch = getch()) != 'q')
@@ -201,16 +215,23 @@ int main(int argc, char *argv[])
                 height_tree += 1;
                 height_trunk = height_tree / 5;
 
-                if (height_tree+height_trunk > maxY)
-                    height_tree = maxY - height_trunk;
+                if (height_tree + height_trunk > (maxY - 1))
+                {
+                    height_tree -= 1;
+                    // Recalculate trunk
+                    height_trunk = height_tree / 5;
+                }
 
                 break;
             case KEY_DOWN: // Press Down to decrease height
                 height_tree -= 1;
                 height_trunk = height_tree / 5;
 
-                if (height_tree-height_trunk < 1)
+                if (height_tree - height_trunk < 1)
+                {
                     height_tree = 1;
+                    height_trunk = height_tree / 5;
+                }
 
                 break;
             case KEY_RIGHT: // Press right key reverse foreground/background colour.
@@ -232,9 +253,7 @@ int main(int argc, char *argv[])
         erase();
         print_tree(height_tree, half);
         print_trunk(height_tree, height_trunk, half);
-
-        mvprintw(maxY-1, 0, "%d", height_tree);
-        mvprintw(maxY-1, 5, "%d", height_trunk);
+        print_footer(maxY, height_tree, height_trunk);
     }
 
 
