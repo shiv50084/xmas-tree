@@ -33,6 +33,22 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
     return 0;
 }
 
+int print_header(int maxY, int maxX)
+{
+    char buf[50];
+
+    memset(buf, '\0', sizeof buf);
+    int char_ret1 = snprintf(buf, sizeof buf, "Max Height: %d", maxY);
+    mvaddstr(0, 0, buf);
+
+    memset(buf, '\0', sizeof buf);
+    int char_ret2 = snprintf(buf, sizeof buf, "Max Width: %d", maxX);
+    mvaddstr(0, char_ret1 + 1, buf);
+
+    refresh();
+    return 0;
+}
+
 int print_footer(int maxY, int height_tree, int height_trunk)
 {
     char buf[50];
@@ -79,7 +95,7 @@ int print_tree(int height, char half)
                 if (j == i)
                     attron(A_BOLD | A_BLINK | A_UNDERLINE);
 
-                mvaddstr(i, j, "*");
+                mvaddstr(i+1, j, "*");
 
                 if (j == i)
                     attroff(A_BOLD | A_BLINK | A_UNDERLINE);
@@ -101,7 +117,7 @@ int print_tree(int height, char half)
                         attron(A_BOLD | A_BLINK | A_UNDERLINE);
                     }
 
-                    mvaddstr(i, j, "*");
+                    mvaddstr(i+1, j, "*");
 
                     if (j == (height-1) - i ||
                         j == width-1)
@@ -190,6 +206,7 @@ int main(int argc, char *argv[])
 
 
     // Print tree and then wait for a key
+    print_header(maxY, maxX);
     print_tree(height_tree, half);
     print_trunk(height_tree, height_trunk, half);
     print_footer(maxY, height_tree, height_trunk);
@@ -251,6 +268,7 @@ int main(int argc, char *argv[])
         }
 
         erase();
+        print_header(maxY, maxX);
         print_tree(height_tree, half);
         print_trunk(height_tree, height_trunk, half);
         print_footer(maxY, height_tree, height_trunk);
