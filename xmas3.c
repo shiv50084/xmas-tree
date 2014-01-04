@@ -93,7 +93,7 @@ int print_trunk(int height_tree, int height_trunk, char half)
         {
             for (int j = (height_tree - height_trunk);j < (height_tree - height_trunk) + width_trunk;j++)
             {
-                mvaddstr(i+HEADER_ROWS, j, "#");
+                color_str(i+HEADER_ROWS, j, j % COLORS, i % COLORS, "#");
             }
         }
     }
@@ -103,7 +103,7 @@ int print_trunk(int height_tree, int height_trunk, char half)
         {
             for (int j = 0;j < width_trunk / 2;j++)
             {
-                mvaddstr(i+HEADER_ROWS, j, "#");
+                color_str(i+HEADER_ROWS, j, i % COLORS, j % COLORS, "#");
             }
         }
     }
@@ -125,7 +125,7 @@ int print_tree(int height, char half)
                 if (j == i)
                     attron(A_BOLD | A_BLINK | A_UNDERLINE);
 
-                mvaddstr(i+HEADER_ROWS, j, "*");
+                color_str(i+HEADER_ROWS, j, j % COLORS, i % COLORS, "*");
 
                 if (j == i)
                     attroff(A_BOLD | A_BLINK | A_UNDERLINE);
@@ -147,7 +147,7 @@ int print_tree(int height, char half)
                         attron(A_BOLD | A_BLINK | A_UNDERLINE);
                     }
 
-                    mvaddstr(i+HEADER_ROWS, j, "*");
+                    color_str(i+HEADER_ROWS, j, i % COLORS, j % COLORS, "*");
 
                     if (j == (height-1) - i ||
                         j == width-1)
@@ -209,15 +209,11 @@ int main(int argc, char *argv[])
         // Assign terminal default foreground/background colors to color number -1
         use_default_colors();
 
-        init_pair(1, COLOR_RED,     COLOR_BLACK);
-        init_pair(2, COLOR_GREEN,   COLOR_BLACK);
-        init_pair(3, COLOR_YELLOW,  COLOR_BLACK);
-        init_pair(4, COLOR_BLUE,    COLOR_BLACK);
-        init_pair(5, COLOR_CYAN,    COLOR_BLACK);
-        init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
-        init_pair(7, COLOR_WHITE,   COLOR_BLACK);
-        init_pair(8, COLOR_RED,     COLOR_WHITE);
-        init_pair(9, COLOR_GREEN,   COLOR_WHITE);
+        // Initialize color pairs.
+        short pair_count = 0;
+        for(short i = 0;i<COLORS;i++)
+            for(short j = 0;j<COLORS;j++)
+                init_pair(pair_count++, i, j);
     }
 
 
