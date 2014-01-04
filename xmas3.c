@@ -4,6 +4,9 @@
 #include <string.h>
 #include <curses.h>
 
+#define HEADER_ROWS 1
+#define FOOTER_ROWS 1
+
 void usage(char *argv0)
 {
     printf("USAGE: %s [height] [half|full]\n", argv0);
@@ -36,14 +39,17 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
 int print_header(int maxY, int maxX)
 {
     char buf[50];
+    int header_width = 0;
 
     memset(buf, '\0', sizeof buf);
     int char_ret1 = snprintf(buf, sizeof buf, "Max Height: %d", maxY);
     mvaddstr(0, 0, buf);
+    header_width += char_ret1;
 
     memset(buf, '\0', sizeof buf);
     int char_ret2 = snprintf(buf, sizeof buf, "Max Width: %d", maxX);
-    mvaddstr(0, char_ret1 + 1, buf);
+    mvaddstr(0, ++header_width, buf);
+    header_width += char_ret2;
 
     refresh();
     return 0;
@@ -52,14 +58,22 @@ int print_header(int maxY, int maxX)
 int print_footer(int maxY, int height_tree, int height_trunk)
 {
     char buf[50];
+    int footer_width = 0;
 
     memset(buf, '\0', sizeof buf);
     int char_ret1 = snprintf(buf, sizeof buf, "Height tree: %d", height_tree);
     mvaddstr(maxY - 1, 0, buf);
+    footer_width += char_ret1;
 
     memset(buf, '\0', sizeof buf);
     int char_ret2 = snprintf(buf, sizeof buf, "Height trunk: %d", height_trunk);
-    mvaddstr(maxY - 1, char_ret1 + 1, buf);
+    mvaddstr(maxY - 1, ++footer_width, buf);
+    footer_width += char_ret2;
+
+    memset(buf, '\0', sizeof buf);
+    int char_ret3 = snprintf(buf, sizeof buf, "Total tree height: %d", height_tree + height_trunk);
+    mvaddstr(maxY - 1, ++footer_width, buf);
+    footer_width += char_ret3;
 
     refresh();
     return 0;
@@ -73,7 +87,7 @@ int print_trunk(int height_tree, int height_trunk, char half)
         {
             for (int j = (height_tree - height_trunk);j < (height_tree - height_trunk) + 2 * height_trunk - 1;j++)
             {
-                mvaddstr(i, j, "#");
+                mvaddstr(i+HEADER_ROWS, j, "#");
             }
         }
     }
@@ -95,7 +109,7 @@ int print_tree(int height, char half)
                 if (j == i)
                     attron(A_BOLD | A_BLINK | A_UNDERLINE);
 
-                mvaddstr(i+1, j, "*");
+                mvaddstr(i+HEADER_ROWS, j, "*");
 
                 if (j == i)
                     attroff(A_BOLD | A_BLINK | A_UNDERLINE);
@@ -117,7 +131,7 @@ int print_tree(int height, char half)
                         attron(A_BOLD | A_BLINK | A_UNDERLINE);
                     }
 
-                    mvaddstr(i+1, j, "*");
+                    mvaddstr(i+HEADER_ROWS, j, "*");
 
                     if (j == (height-1) - i ||
                         j == width-1)
@@ -232,7 +246,7 @@ int main(int argc, char *argv[])
                 height_tree += 1;
                 height_trunk = height_tree / 5;
 
-                if (height_tree + height_trunk > (maxY - 1))
+                if (height_tree + height_trunk + HEADER_ROWS > maxY - FOOTER_ROWS)
                 {
                     height_tree -= 1;
                     // Recalculate trunk
