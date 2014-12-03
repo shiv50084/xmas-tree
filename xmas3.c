@@ -4,6 +4,13 @@
 #include <string.h>
 #include <curses.h>
 
+#define PHI 1.61803
+
+#define CALC_HEIGHT_TRUNK(x) ((x) / (PHI * 2.0))
+
+#define HEADER_ROWS 1
+#define FOOTER_ROWS 1
+
 void usage(char *argv0)
 {
     printf("USAGE: %s [height] [half|full]\n", argv0);
@@ -33,15 +40,70 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
     return 0;
 }
 
+int print_header(int maxY, int maxX)
+{
+    char buf[50];
+    int header_width = 0;
+
+    memset(buf, '\0', sizeof buf);
+    int char_ret1 = snprintf(buf, sizeof buf, "Max Height: %d", maxY);
+    mvaddstr(0, 0, buf);
+    header_width += char_ret1;
+
+    memset(buf, '\0', sizeof buf);
+    int char_ret2 = snprintf(buf, sizeof buf, "Max Width: %d", maxX);
+    mvaddstr(0, ++header_width, buf);
+    header_width += char_ret2;
+
+    refresh();
+    return 0;
+}
+
+int print_footer(int maxY, int height_tree, int height_trunk)
+{
+    char buf[50];
+    int footer_width = 0;
+
+    memset(buf, '\0', sizeof buf);
+    int char_ret1 = snprintf(buf, sizeof buf, "Height tree: %d", height_tree);
+    mvaddstr(maxY - 1, 0, buf);
+    footer_width += char_ret1;
+
+    memset(buf, '\0', sizeof buf);
+    int char_ret2 = snprintf(buf, sizeof buf, "Height trunk: %d", height_trunk);
+    mvaddstr(maxY - 1, ++footer_width, buf);
+    footer_width += char_ret2;
+
+    memset(buf, '\0', sizeof buf);
+    int char_ret3 = snprintf(buf, sizeof buf, "Total tree height: %d", height_tree + height_trunk);
+    mvaddstr(maxY - 1, ++footer_width, buf);
+    footer_width += char_ret3;
+
+    refresh();
+    return 0;
+}
+
 int print_trunk(int height_tree, int height_trunk, char half)
 {
+    int width_trunk = 2 * height_trunk - 1;
+
     if (!half) // full tree
     {
-        for (int i = height_tree; i<height_tree+height_trunk;i++)
+        for (int i = height_tree; i < height_tree + height_trunk; i++)
         {
-            for (int j = (height_tree-height_trunk);j < (height_tree-height_trunk) + 2*(height_trunk-1)+1;j++)
+            for (int j = (height_tree - height_trunk);j < (height_tree - height_trunk) + width_trunk;j++)
             {
-                mvaddstr(i, j, "#");
+                color_str(i+HEADER_ROWS, j, j % COLORS, i % COLORS, "#");
+            }
+        }
+    }
+    else // half tree
+    {
+        for (int i = height_tree; i < height_tree + height_trunk; i++)
+        {
+            for (int j = 0;j < width_trunk / 2;j++)
+            {
+                color_str(i+HEADER_ROWS, j, i % COLORS, j % COLORS, "#");
             }
         }
     }
@@ -63,7 +125,7 @@ int print_tree(int height, char half)
                 if (j == i)
                     attron(A_BOLD | A_BLINK | A_UNDERLINE);
 
-                mvaddstr(i, j, "*");
+                color_str(i+HEADER_ROWS, j, j % COLORS, i % COLORS, "*");
 
                 if (j == i)
                     attroff(A_BOLD | A_BLINK | A_UNDERLINE);
@@ -85,7 +147,7 @@ int print_tree(int height, char half)
                         attron(A_BOLD | A_BLINK | A_UNDERLINE);
                     }
 
-                    mvaddstr(i, j, "*");
+                    color_str(i+HEADER_ROWS, j, i % COLORS, j % COLORS, "*");
 
                     if (j == (height-1) - i ||
                         j == width-1)
@@ -111,7 +173,7 @@ int main(int argc, char *argv[])
         usage(argv[0]);
 
     int height_tree = atoi(argv[1]);
-    int height_trunk = height_tree / 5;
+    int height_trunk = CALC_HEIGHT_TRUNK(height_tree);
 
     char half = -1;
     if (!strncmp("half", argv[2], 4 * sizeof(char)))
@@ -147,15 +209,11 @@ int main(int argc, char *argv[])
         // Assign terminal default foreground/background colors to color number -1
         use_default_colors();
 
-        init_pair(1, COLOR_RED,     COLOR_BLACK);
-        init_pair(2, COLOR_GREEN,   COLOR_BLACK);
-        init_pair(3, COLOR_YELLOW,  COLOR_BLACK);
-        init_pair(4, COLOR_BLUE,    COLOR_BLACK);
-        init_pair(5, COLOR_CYAN,    COLOR_BLACK);
-        init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
-        init_pair(7, COLOR_WHITE,   COLOR_BLACK);
-        init_pair(8, COLOR_RED,     COLOR_WHITE);
-        init_pair(9, COLOR_GREEN,   COLOR_WHITE);
+        // Initialize color pairs.
+        short pair_count = 0;
+        for(short i = 0;i<COLORS;i++)
+            for(short j = 0;j<COLORS;j++)
+                init_pair(pair_count++, i, j);
     }
 
 
@@ -174,11 +232,10 @@ int main(int argc, char *argv[])
 
 
     // Print tree and then wait for a key
+    print_header(maxY, maxX);
     print_tree(height_tree, half);
-
-    // Print the height of the tree and trunk.
-    mvprintw(maxY-1, 0, "%d", height_tree);
-    mvprintw(maxY-1, 5, "%d", height_trunk);
+    print_trunk(height_tree, height_trunk, half);
+    print_footer(maxY, height_tree, height_trunk);
 
     // Loop until press q
     while ((ch = getch()) != 'q')
@@ -199,18 +256,25 @@ int main(int argc, char *argv[])
                 break;
             case KEY_UP: // Press Up to increase height
                 height_tree += 1;
-                height_trunk = height_tree / 5;
+                height_trunk = CALC_HEIGHT_TRUNK(height_tree);
 
-                if (height_tree+height_trunk > maxY)
-                    height_tree = maxY - height_trunk;
+                if (height_tree + height_trunk + HEADER_ROWS > maxY - FOOTER_ROWS)
+                {
+                    height_tree -= 1;
+                    // Recalculate trunk
+                    height_trunk = CALC_HEIGHT_TRUNK(height_tree);
+                }
 
                 break;
             case KEY_DOWN: // Press Down to decrease height
                 height_tree -= 1;
-                height_trunk = height_tree / 5;
+                height_trunk = CALC_HEIGHT_TRUNK(height_tree);
 
-                if (height_tree-height_trunk < 1)
+                if (height_tree - height_trunk < 1)
+                {
                     height_tree = 1;
+                    height_trunk = CALC_HEIGHT_TRUNK(height_tree);
+                }
 
                 break;
             case KEY_RIGHT: // Press right key reverse foreground/background colour.
@@ -230,11 +294,10 @@ int main(int argc, char *argv[])
         }
 
         erase();
+        print_header(maxY, maxX);
         print_tree(height_tree, half);
         print_trunk(height_tree, height_trunk, half);
-
-        mvprintw(maxY-1, 0, "%d", height_tree);
-        mvprintw(maxY-1, 5, "%d", height_trunk);
+        print_footer(maxY, height_tree, height_trunk);
     }
 
 
