@@ -114,9 +114,9 @@ int main(int argc, char *argv[])
     int height_trunk = height_tree / 5;
 
     char half = -1;
-    if (!strncmp("half", argv[2], sizeof 4))
+    if (!strncmp("half", argv[2], 4 * sizeof(char)))
         half = 1;
-    else if(!strncmp("full", argv[2], sizeof 4))
+    else if(!strncmp("full", argv[2], 4 * sizeof(char)))
         half = 0;
     else
         usage(argv[0]);
