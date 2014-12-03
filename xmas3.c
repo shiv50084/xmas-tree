@@ -17,7 +17,7 @@ void usage(char *argv0)
     exit(-1);
 }
 
-int color_str(int y, int x, short fg_color, short bg_color, const char * str)
+void color_str(int y, int x, short fg_color, short bg_color, const char * str)
 {
     short i;
     // Search all the pair of colors
@@ -37,7 +37,6 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
     mvaddstr(y,x,str);
 
     attroff(COLOR_PAIR(i));
-    return 0;
 }
 
 int print_header(int maxY, int maxX)
